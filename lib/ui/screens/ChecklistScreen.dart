@@ -12,8 +12,7 @@ import '../widgets/latoButton.dart';
 class ChecklistScreen extends GetView<ChecklistViewModel> {
   @override
   void initState() {
-    controller
-        .checkPermissions(); // Check permissions when the screen is initialized
+    controller.checkPermissions(); // Check permissions when the screen is initialized
   }
 
   @override
@@ -44,19 +43,27 @@ class ChecklistScreen extends GetView<ChecklistViewModel> {
                           // Plus icon to add new media
                           GestureDetector(
                             onTap: () async {
-                              // Check permissions before showing the image picker
-                              bool cameraGranted = await controller
-                                  .permissionService
-                                  .requestCameraPermission();
+                              if(Platform.isAndroid){
+                                // Check permissions before showing the image picker
+                                bool cameraGranted = await controller
+                                    .permissionService
+                                    .requestCameraPermission();
 
-                              if (cameraGranted) {
-                                showImagePicker(
+                                if (cameraGranted) {
+                                  showMediaTypePicker(
+                                      context: context,
+                                      controller: controller,
+                                      index: index);
+                                } else {
+                                  showSnackbar(context, AppText.permissionDenied);
+                                }
+                              }else{
+                                showMediaTypePicker(
                                     context: context,
                                     controller: controller,
                                     index: index);
-                              } else {
-                                showSnackbar(context, AppText.permissionDenied);
                               }
+
                             },
                             child: Container(
                               width: 100,

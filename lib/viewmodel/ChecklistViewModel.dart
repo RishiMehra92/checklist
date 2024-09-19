@@ -27,7 +27,7 @@ class ChecklistViewModel extends GetxController {
     checkSubmitStatus(); // Check if submit should be enabled after setting size
   }
 
-  // Add media to a checklist item
+  // Add media (image/video) to a checklist item
   void addMedia(int index, String mediaPath) {
     if (checklistItems[index].mediaPaths.length < 10) {
       checklistItems[index].mediaPaths.add(mediaPath);
@@ -73,29 +73,24 @@ class ChecklistViewModel extends GetxController {
     storage.remove('checklist_items');
   }
 
-  Future<void> pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source);
-    if (pickedFile != null) {
-      addMedia(
-          0,
-          pickedFile
-              .path); // Add the picked media to the checklist (change index as needed)
-    } else {
-      print('No image selected.');
-    }
-  }
-
-  // Pick media for a given checklist index
-  Future<void> pickMedia(ImageSource source, int index) async {
+  // Pick media for a given checklist index, supporting both image and video
+  Future<void> pickMedia(ImageSource source, int index, {bool isVideo = false}) async {
     // Request storage permission before opening gallery or camera
     bool isStorageGranted = await permissionService.requestStoragePermission();
     bool isCameraGranted = await permissionService.requestCameraPermission();
 
     if (isStorageGranted || isCameraGranted) {
-      final pickedFile = await _picker.pickImage(source: source);
+      XFile? pickedFile;
+
+      // Pick video or image based on the media type
+      if (isVideo) {
+        pickedFile = await _picker.pickVideo(source: source);
+      } else {
+        pickedFile = await _picker.pickImage(source: source);
+      }
+
       if (pickedFile != null) {
-        addMedia(
-            index, pickedFile.path); // Add the picked media to the checklist
+        addMedia(index, pickedFile.path); // Add the picked media to the checklist
       }
     } else {
       Get.snackbar(
